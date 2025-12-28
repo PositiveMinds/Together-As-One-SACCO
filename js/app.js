@@ -8,7 +8,31 @@ const App = {
             await this.setupEventListeners();
             // Restore the last active page, or show dashboard as default
             await UI.restoreLastPage();
+            // Restore scroll position
+            this.restoreScrollPosition();
+            // Setup scroll position saving
+            this.setupScrollPositionSaving();
         },
+
+      setupScrollPositionSaving() {
+            window.addEventListener('scroll', () => {
+                  const scrollPos = window.scrollY || window.pageYOffset;
+                  localStorage.setItem('scrollPosition', scrollPos);
+            });
+      },
+
+      restoreScrollPosition() {
+            setTimeout(() => {
+                  const savedScrollPos = localStorage.getItem('scrollPosition');
+                  if (savedScrollPos !== null) {
+                        window.scrollTo(0, parseInt(savedScrollPos, 10));
+                  }
+            }, 100);
+      },
+
+      clearScrollPosition() {
+            localStorage.removeItem('scrollPosition');
+      },
 
       async setupEventListeners() {
          // Navigation

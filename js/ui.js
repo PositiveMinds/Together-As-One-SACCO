@@ -335,13 +335,6 @@ const UI = {
          container.innerHTML = members.map(member => `
              <div class="col-md-6 col-lg-4">
                  <div class="card member-card h-100">
-                     <!-- Member Photo if available - full width no padding -->
-                     ${member.photo ? `
-                     <div style="width: 100%; height: 200px; overflow: hidden; background: #f0f0f0; margin: -1px -1px 0px -1px; border-radius: 12px 12px 0 0;">
-                         <img src="${member.photo}" alt="${member.name}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-                     </div>
-                     ` : ''}
-                     
                      <!-- Card Header with Avatar and Actions -->
                      <div class="member-card-header-section">
                          <div class="d-flex align-items-center gap-3">
@@ -446,9 +439,9 @@ const UI = {
                                  <td style="text-align: center; vertical-align: middle; padding: 12px 8px;">
                                      <div style="position: relative; display: inline-block;">
                                          ${member.photo ? 
-                                             `<img src="${member.photo}" alt="${member.name}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: inline-block; border: 2px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" title="${member.name}">` :
-                                             `<div style="width: 40px; height: 40px; background: ${bgColor}; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.75rem; border: 2px solid ${bgColor}; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" title="${member.name}">${initials}</div>`
-                                         }
+                                                 `<img src="${member.photo}?t=${member.updatedAt || Date.now()}" alt="${member.name}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: inline-block; border: 2px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" title="${member.name}">` :
+                                                 `<div style="width: 40px; height: 40px; background: ${bgColor}; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.75rem; border: 2px solid ${bgColor}; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" title="${member.name}">${initials}</div>`
+                                             }
                                      </div>
                                  </td>
                                  <td style="vertical-align: middle;"><strong>${member.name}</strong></td>
