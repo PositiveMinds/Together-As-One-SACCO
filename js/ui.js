@@ -336,19 +336,19 @@ const UI = {
              <div class="col-md-6 col-lg-4">
                  <div class="card member-card h-100">
                      <!-- Card Header with Avatar and Actions -->
-                     <div class="member-card-header-section">
-                         <div class="d-flex align-items-center gap-3">
+                     <div class="member-card-header-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.5rem 1.5rem; margin: -1px -1px 0 -1px; border-radius: 12px 12px 0 0;">
+                         <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
                              <div class="member-avatar">
-                                 ${App.getAvatarHtml(member, 'md')}
+                                 ${App.getAvatarHtml(member, 'lg')}
                              </div>
-                             <div class="flex-grow-1">
-                                 <h6 class="member-card-name mb-1">${member.name}</h6>
-                                 <span class="member-card-badge">Active Member</span>
+                             <div style="text-align: center; width: 100%; color: white;">
+                                 <h6 class="member-card-name mb-1" style="color: white; margin: 0;">${member.name}</h6>
+                                 <span class="member-card-badge" style="background: rgba(255,255,255,0.3); color: white;">Active Member</span>
                              </div>
                          </div>
-                         <div class="member-card-actions">
+                         <div class="member-card-actions" style="position: absolute; top: 1rem; right: 1rem;">
                              <div class="dropdown">
-                                 <button class="btn btn-sm btn-icon" type="button" id="memberDropdown-${member.id}" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
+                                 <button class="btn btn-sm btn-icon" type="button" id="memberDropdown-${member.id}" data-bs-toggle="dropdown" aria-expanded="false" title="Actions" style="background: rgba(255,255,255,0.2); border: none; color: white;">
                                      <i class="ri-more-2-line"></i>
                                  </button>
                                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="memberDropdown-${member.id}">

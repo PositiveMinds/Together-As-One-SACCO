@@ -2,8 +2,8 @@
   "name": "The Four - SACCO Management System",
   "short_name": "The Four",
   "description": "Savings and Credit Cooperative Society Management System",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "orientation": "portrait-primary",
@@ -20,41 +20,41 @@
       "url": "/?page=dashboard",
       "icons": [
         {
-          "src": "/images/image-192.png",
+          "src": "./images/image-192.png",
           "sizes": "192x192",
           "type": "image/png"
         }
       ]
-    },
-    {
+      },
+      {
       "name": "Members",
       "short_name": "Members",
       "description": "Manage Members",
-      "url": "/?page=members",
+      "url": "./?page=members",
       "icons": [
         {
-          "src": "/images/image-192.png",
+          "src": "./images/image-192.png",
           "sizes": "192x192",
           "type": "image/png"
         }
       ]
-    }
+      }
   ],
   "icons": [
     {
-      "src": "/images/image-192.png",
+      "src": "./images/image-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/image-384.png",
+      "src": "./images/image-384.png",
       "sizes": "384x384",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/image-512.png",
+      "src": "./images/image-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -63,13 +63,13 @@
   "categories": ["business", "finance", "productivity"],
   "screenshots": [
     {
-      "src": "/images/image-384.png",
+      "src": "./images/image-384.png",
       "sizes": "384x384",
       "type": "image/png",
       "form_factor": "narrow"
     },
     {
-      "src": "/images/image-512.png",
+      "src": "./images/image-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "wide"

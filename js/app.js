@@ -785,17 +785,19 @@ const App = {
     },
 
     async updateMember(id) {
-         console.log('updateMember called for id:', id);
-         const member = await Storage.getMemberById(id);
-         if (!member) {
-             UI.showAlert('Member not found', 'error');
-             return;
-         }
-         console.log('Member loaded:', member.name, 'has photo:', !!member.photo);
+        console.log('updateMember called for id:', id);
+        const member = await Storage.getMemberById(id);
+        if (!member) {
+            UI.showAlert('Member not found', 'error');
+            return;
+        }
+        console.log('Member loaded:', member.name, 'has photo:', !!member.photo);
 
-         // Reset the update photo data
-         this._updatePhotoData = null;
-         window._saccoUpdatePhotoData = null;
+        // Reset the update photo data for fresh start
+        this._updatePhotoData = null;
+        window._saccoUpdatePhotoData = null;
+        this._currentUpdateMemberId = null;
+        this._currentUpdateMember = null;
 
          const initials = this.getInitials(member.name);
          const bgColor = member.photo ? 'transparent' : this.getAvatarColor(member.name);
@@ -856,10 +858,13 @@ const App = {
                  const fileInput = document.getElementById('updateMemberPhoto');
                  if (fileInput) {
                      console.log('File input found, attaching listener');
-                     fileInput.addEventListener('change', (e) => {
+                     // Remove any previous listeners and add new one
+                     fileInput.removeEventListener('change', this._updatePhotoHandler);
+                     this._updatePhotoHandler = (e) => {
                          console.log('File selected:', e.target.files[0]?.name);
-                         App.previewUpdateMemberPhoto(e);
-                     });
+                         this.previewUpdateMemberPhoto(e);
+                     };
+                     fileInput.addEventListener('change', this._updatePhotoHandler);
                  } else {
                      console.warn('File input not found!');
                  }
