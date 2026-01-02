@@ -548,41 +548,45 @@ const UI = {
 
          const rows = await Promise.all(displayLoans.map(async loan => {
              const member = await Storage.getMemberById(loan.memberId);
-            const remaining = loan.amount - loan.paid;
-            const dueDate = new Date(loan.dueDate);
-            const today = new Date();
-            const isOverdue = loan.status === 'active' && dueDate < today;
-            const statusClass = isOverdue ? 'status-overdue' :
-                loan.status === 'completed' ? 'status-completed' : 'status-active';
-            const statusText = isOverdue ? 'OVERDUE' :
-                loan.status === 'completed' ? 'COMPLETED' : 'ACTIVE';
+             const borrowerName = loan.borrowerType === 'non-member' ? loan.borrowerName : member?.name || 'Unknown';
+             const loanTypeLabel = loan.loanType ? loan.loanType.charAt(0).toUpperCase() + loan.loanType.slice(1) : 'Normal';
+             const remaining = loan.amount - loan.paid;
+             const dueDate = new Date(loan.dueDate);
+             const today = new Date();
+             const isOverdue = loan.status === 'active' && dueDate < today;
+             const statusClass = isOverdue ? 'status-overdue' :
+                 loan.status === 'completed' ? 'status-completed' : 'status-active';
+             const statusText = isOverdue ? 'OVERDUE' :
+                 loan.status === 'completed' ? 'COMPLETED' : 'ACTIVE';
 
-            // Calculate monthly installment
-            const totalInterest = (loan.amount * loan.interestRate * loan.term) / (12 * 100);
-            const totalAmount = loan.amount + totalInterest;
-            const monthlyInstallment = totalAmount / loan.term;
+             // Calculate monthly installment
+             const totalInterest = (loan.amount * loan.interestRate * loan.term) / (12 * 100);
+             const totalAmount = loan.amount + totalInterest;
+             const monthlyInstallment = totalAmount / loan.term;
 
-            let actions = `<button class="btn btn-secondary btn-sm icon-btn" title="View Details" onclick="App.viewLoanDetails('${loan.id}')">${App.icons.view}</button>`;
-            if (isOverdue) {
-                actions += ` <button class="btn btn-warning btn-sm icon-btn" title="Apply Penalty" onclick="App.applyPenalty('${loan.id}')"><i class="ri-alert-line"></i></button>`;
-            }
-            actions += ` <button class="btn btn-info btn-sm icon-btn" title="Edit Loan" onclick="App.editLoan('${loan.id}')">${App.icons.edit}</button>`;
-            actions += ` <button class="btn btn-danger btn-sm icon-btn" title="Delete Loan" onclick="App.deleteLoan('${loan.id}')">${App.icons.delete}</button>`;
+             let actions = `<button class="btn btn-secondary btn-sm icon-btn" title="View Details" onclick="App.viewLoanDetails('${loan.id}')">${App.icons.view}</button>`;
+             if (isOverdue) {
+                 actions += ` <button class="btn btn-warning btn-sm icon-btn" title="Apply Penalty" onclick="App.applyPenalty('${loan.id}')"><i class="ri-alert-line"></i></button>`;
+             }
+             actions += ` <button class="btn btn-info btn-sm icon-btn" title="Edit Loan" onclick="App.editLoan('${loan.id}')">${App.icons.edit}</button>`;
+             actions += ` <button class="btn btn-danger btn-sm icon-btn" title="Delete Loan" onclick="App.deleteLoan('${loan.id}')">${App.icons.delete}</button>`;
 
-            return `
-                <tr>
-                    <td>${member?.name || 'Unknown'}</td>
-                    <td>UGX ${this.formatNumber(loan.amount)}</td>
-                    <td>UGX ${this.formatNumber(monthlyInstallment.toFixed(0))}</td>
-                    <td>${dueDate.toLocaleDateString()}</td>
-                    <td><span class="${statusClass}">${statusText}</span></td>
-                    <td>UGX ${this.formatNumber(remaining)}</td>
-                    <td>${actions}</td>
-                </tr>
-            `;
-            }));
-            tbody.innerHTML = rows.join('');
-            this.renderLoansPagination();
+             return `
+                 <tr>
+                     <td>${borrowerName}</td>
+                     <td><span class="badge bg-primary">${loanTypeLabel}</span></td>
+                     <td>UGX ${this.formatNumber(loan.amount)}</td>
+                     <td>${loan.interestRate}%</td>
+                     <td>UGX ${this.formatNumber(monthlyInstallment.toFixed(0))}</td>
+                     <td>${dueDate.toLocaleDateString()}</td>
+                     <td><span class="${statusClass}">${statusText}</span></td>
+                     <td>UGX ${this.formatNumber(remaining)}</td>
+                     <td>${actions}</td>
+                 </tr>
+             `;
+             }));
+             tbody.innerHTML = rows.join('');
+             this.renderLoansPagination();
     },
 
     loadMoreLoans() {

@@ -309,6 +309,28 @@ const App = {
             this.addLoan();
         });
 
+        // Loan form event listeners
+        document.getElementById('loanAmount').addEventListener('input', () => this.calculateMonthlyInstallment());
+        document.getElementById('loanTerm').addEventListener('input', () => this.calculateMonthlyInstallment());
+        document.getElementById('loanType').addEventListener('change', () => this.updateInterestRate());
+
+        // Top up loan form
+        document.getElementById('topUpLoanForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.processLoanTopUp();
+        });
+
+        document.getElementById('topUpSelectLoan')?.addEventListener('change', async (e) => {
+            if (e.target.value) {
+                await this.loadLoanTopUpDetails(e.target.value);
+            }
+        });
+
+        document.getElementById('topUpAmount')?.addEventListener('input', () => this.calculateNewTopUpTotal());
+
+        // Load active loans for top up select
+        this.loadTopUpLoanSelect();
+
         document.getElementById('paymentForm').addEventListener('submit', (e) => {
             e.preventDefault();
             this.addPayment();
@@ -703,30 +725,110 @@ const App = {
      },
 
     // Loan operations
-    async addLoan() {
-        const memberId = document.getElementById('loanMember').value;
-        const amount = parseFloat(document.getElementById('loanAmount').value);
-        const term = parseInt(document.getElementById('loanTerm').value);
+    updateBorrowerOptions() {
+        const borrowerType = document.getElementById('borrowerType').value;
+        const memberSelect = document.getElementById('loanMember');
+        const nonMemberName = document.getElementById('nonMemberName');
+        const loanType = document.getElementById('loanType');
+
+        if (borrowerType === 'member') {
+            memberSelect.style.display = 'block';
+            memberSelect.required = true;
+            nonMemberName.style.display = 'none';
+            nonMemberName.required = false;
+            
+            // Only show member loans
+            loanType.innerHTML = `
+                <option value="" disabled selected>Select loan type...</option>
+                <option value="normal">Normal Loan (2%)</option>
+                <option value="emergency">Emergency Loan (5%)</option>
+            `;
+        } else if (borrowerType === 'non-member') {
+            memberSelect.style.display = 'none';
+            memberSelect.required = false;
+            nonMemberName.style.display = 'block';
+            nonMemberName.required = true;
+            
+            // Only show non-member loan
+            loanType.innerHTML = `
+                <option value="" disabled selected>Select loan type...</option>
+                <option value="non-member">Non-Member Loan (10%)</option>
+            `;
+        }
+        
+        loanType.value = '';
+        this.updateInterestRate();
+    },
+
+    updateInterestRate() {
+        const loanType = document.getElementById('loanType').value;
+        const interestRateField = document.getElementById('interestRate');
+        
+        const rates = {
+            'normal': 2,
+            'emergency': 5,
+            'non-member': 10
+        };
+        
+        interestRateField.value = rates[loanType] || 2;
+        this.calculateMonthlyInstallment();
+    },
+
+    calculateMonthlyInstallment() {
+        const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
+        const term = parseInt(document.getElementById('loanTerm').value) || 0;
         const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
-        const loanDate = document.getElementById('loanDate').value;
-
-        if (!memberId || !amount || !term || !loanDate) {
-            UI.showAlert('Please fill in all required fields', 'warning');
-            return;
+        
+        if (amount > 0 && term > 0) {
+            const totalInterest = (amount * interestRate * term) / (12 * 100);
+            const totalAmount = amount + totalInterest;
+            const monthlyPayment = totalAmount / term;
+            document.getElementById('monthlyInstallment').textContent = `UGX ${UI.formatNumber(monthlyPayment.toFixed(0))}`;
+        } else {
+            document.getElementById('monthlyInstallment').textContent = 'UGX 0';
         }
+    },
 
-        if (amount <= 0 || term <= 0) {
-            UI.showAlert('Amount and term must be greater than 0', 'warning');
-            return;
-        }
+    async addLoan() {
+         const borrowerType = document.getElementById('borrowerType').value;
+         const memberId = borrowerType === 'member' ? document.getElementById('loanMember').value : null;
+         const nonMemberName = borrowerType === 'non-member' ? document.getElementById('nonMemberName').value : null;
+         const loanType = document.getElementById('loanType').value;
+         const amount = parseFloat(document.getElementById('loanAmount').value);
+         const term = parseInt(document.getElementById('loanTerm').value);
+         const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
+         const loanDate = document.getElementById('loanDate').value;
 
-        try {
-             // Verify member exists
-             const member = await Storage.getMemberById(memberId);
-             if (!member) {
-                 UI.showAlert('Selected member not found', 'error');
-                 return;
-             }
+         if (!borrowerType || !loanType || !amount || !term || !loanDate) {
+             UI.showAlert('Please fill in all required fields', 'warning');
+             return;
+         }
+
+         if (borrowerType === 'member' && !memberId) {
+             UI.showAlert('Please select a member', 'warning');
+             return;
+         }
+
+         if (borrowerType === 'non-member' && !nonMemberName) {
+             UI.showAlert('Please enter the non-member name', 'warning');
+             return;
+         }
+
+         if (amount <= 0 || term <= 0) {
+             UI.showAlert('Amount and term must be greater than 0', 'warning');
+             return;
+         }
+
+         try {
+              // Verify member exists (only for members)
+              let member = null;
+              if (borrowerType === 'member') {
+                  member = await Storage.getMemberById(memberId);
+                  if (!member) {
+                      UI.showAlert('Selected member not found', 'error');
+                      return;
+                  }
+              }
 
              // Check if loan amount exceeds total collective savings (all members)
              const allSavings = await Storage.getSavings();
@@ -755,21 +857,25 @@ const App = {
              }
 
              // Calculate due date
-            const startDate = new Date(loanDate);
-            const dueDate = new Date(startDate);
-            dueDate.setMonth(dueDate.getMonth() + term);
+             const startDate = new Date(loanDate);
+             const dueDate = new Date(startDate);
+             dueDate.setMonth(dueDate.getMonth() + term);
 
-            // Store interest rate for future reference
-            const loan = Storage.addLoan({
+             // Store interest rate for future reference
+             const loan = Storage.addLoan({
                 memberId,
+                borrowerType,
+                loanType,
+                borrowerName: borrowerType === 'non-member' ? nonMemberName : null,
                 amount,
                 term,
                 interestRate,
                 loanDate,
                 dueDate: dueDate.toISOString().split('T')[0]
-            });
+             });
 
-            Storage.addAuditLog('LOAN_CREATED', `Loan of UGX ${amount} created for ${member.name}`);
+             const borrowerName = borrowerType === 'member' ? member.name : nonMemberName;
+             Storage.addAuditLog('LOAN_CREATED', `${loanType} loan of UGX ${amount} (${interestRate}%) created for ${borrowerName}`);
              
              // Calculate monthly installment
              const totalInterest = (amount * interestRate * term) / (12 * 100);
@@ -778,14 +884,14 @@ const App = {
              
              // Show SweetAlert notification
              if (typeof SweetAlertUI !== 'undefined') {
-                 await SweetAlertUI.loanCreated(member.name, amount, monthlyPayment);
+                 await SweetAlertUI.loanCreated(borrowerName, amount, monthlyPayment);
              } else {
                  UI.showAlert('Loan created successfully', 'success');
              }
              
-             // Send notification
-             if (typeof notificationManager !== 'undefined') {
-                 notificationManager.notifyLoanCreated(member.name, amount, loan.id);
+             // Send notification (only for members)
+             if (borrowerType === 'member' && typeof notificationManager !== 'undefined') {
+                 notificationManager.notifyLoanCreated(borrowerName, amount, loan.id);
              }
              
              // Trigger payment reminder check
@@ -804,7 +910,165 @@ const App = {
              } else {
                  UI.showAlert('Error creating loan: ' + error.message, 'error');
              }
+             }
+    },
+
+    async loadTopUpLoanSelect() {
+        try {
+            const loans = await Storage.getLoans();
+            const activeLoans = loans.filter(l => l.status === 'active');
+            const select = document.getElementById('topUpSelectLoan');
+            
+            if (select && activeLoans.length > 0) {
+                select.innerHTML = '<option value="" disabled selected>Choose a loan...</option>';
+                activeLoans.forEach(loan => {
+                    const remaining = loan.amount - loan.paid;
+                    const borrowerName = loan.borrowerType === 'non-member' ? loan.borrowerName : 'Member Loan';
+                    const option = document.createElement('option');
+                    option.value = loan.id;
+                    option.textContent = `${loan.id.substring(0, 8)} - ${borrowerName} (Balance: UGX ${UI.formatNumber(remaining)})`;
+                    select.appendChild(option);
+                });
+                
+                // Refresh Select2 if available
+                if (typeof jQuery !== 'undefined' && jQuery(select).data('select2')) {
+                    jQuery(select).trigger('change');
+                }
             }
+        } catch (error) {
+            console.error('Error loading top up loans:', error);
+        }
+    },
+
+    async loadLoanTopUpDetails(loanId) {
+        try {
+            const loan = await Storage.getLoanById(loanId);
+            if (!loan) {
+                UI.showAlert('Loan not found', 'error');
+                return;
+            }
+
+            const remaining = loan.amount - loan.paid;
+            document.getElementById('topUpOriginalAmount').textContent = `UGX ${UI.formatNumber(loan.amount)}`;
+            document.getElementById('topUpInterestRate').textContent = `${loan.interestRate}%`;
+            document.getElementById('topUpRemainingBalance').textContent = `UGX ${UI.formatNumber(remaining)}`;
+            document.getElementById('topUpAmount').value = '';
+            this.calculateNewTopUpTotal();
+        } catch (error) {
+            console.error('Error loading loan details:', error);
+        }
+    },
+
+    calculateNewTopUpTotal() {
+        const loanId = document.getElementById('topUpSelectLoan').value;
+        const topUpAmount = parseFloat(document.getElementById('topUpAmount').value) || 0;
+        
+        if (loanId && topUpAmount > 0) {
+            Storage.getLoanById(loanId).then(loan => {
+                if (loan) {
+                    const newTotal = loan.amount + topUpAmount;
+                    document.getElementById('topUpNewTotal').textContent = `UGX ${UI.formatNumber(newTotal)}`;
+                }
+            });
+        } else {
+            document.getElementById('topUpNewTotal').textContent = 'UGX 0';
+        }
+    },
+
+    async processLoanTopUp() {
+        const loanId = document.getElementById('topUpSelectLoan').value;
+        const topUpAmount = parseFloat(document.getElementById('topUpAmount').value);
+        const topUpDate = document.getElementById('topUpDate').value;
+
+        if (!loanId || !topUpAmount || !topUpDate) {
+            UI.showAlert('Please fill in all required fields', 'warning');
+            return;
+        }
+
+        if (topUpAmount <= 0) {
+            UI.showAlert('Top up amount must be greater than 0', 'warning');
+            return;
+        }
+
+        try {
+            const loan = await Storage.getLoanById(loanId);
+            if (!loan) {
+                UI.showAlert('Loan not found', 'error');
+                return;
+            }
+
+            // Check if loan amount exceeds total collective savings
+            const allSavings = await Storage.getSavings();
+            const totalCollectiveSavings = allSavings.reduce((sum, saving) => sum + (saving.amount || 0), 0);
+            
+            const allWithdrawals = await Storage.getWithdrawals();
+            const totalWithdrawals = allWithdrawals.reduce((sum, withdrawal) => sum + (withdrawal.amount || 0), 0);
+            
+            const availableSavingsPool = totalCollectiveSavings - totalWithdrawals;
+            
+            // Get all active loans to check total loaned out (excluding this loan)
+            const allLoans = await Storage.getLoans();
+            const totalCurrentlyLoaned = allLoans.reduce((sum, l) => sum + (l.id === loanId ? 0 : l.amount), 0);
+            
+            const maxAvailableToLend = availableSavingsPool - totalCurrentlyLoaned;
+            
+            if (topUpAmount > maxAvailableToLend) {
+                UI.showAlert(
+                    `Cannot process top up: Amount (UGX ${UI.formatNumber(topUpAmount)}) exceeds available lending pool (UGX ${UI.formatNumber(maxAvailableToLend)}).`,
+                    'warning'
+                );
+                return;
+            }
+
+            // Update loan amount
+             const originalAmount = loan.amount;
+             const newAmount = originalAmount + topUpAmount;
+             
+             // Update due date (extend by proportional months)
+             const originalDueDate = new Date(loan.dueDate);
+             const topUpProportion = topUpAmount / originalAmount;
+             const additionalMonths = Math.ceil(loan.term * topUpProportion);
+             const newDueDate = new Date(originalDueDate);
+             newDueDate.setMonth(newDueDate.getMonth() + additionalMonths);
+
+             const topUps = loan.topUps || [];
+             topUps.push({
+                 amount: topUpAmount,
+                 date: topUpDate,
+                 timestamp: new Date().toISOString()
+             });
+
+             // Save updated loan
+             await Storage.updateLoan(loanId, {
+                 amount: newAmount,
+                 dueDate: newDueDate.toISOString().split('T')[0],
+                 topUps: topUps
+             });
+            
+            const borrowerName = loan.borrowerType === 'non-member' ? loan.borrowerName : (await Storage.getMemberById(loan.memberId))?.name || 'Member';
+            Storage.addAuditLog('LOAN_TOPUP', `Top up of UGX ${topUpAmount} added to loan ${loanId}. New total: UGX ${newAmount}`);
+
+            if (typeof SweetAlertUI !== 'undefined') {
+                await SweetAlertUI.loanCreated(`${borrowerName} - Top Up`, topUpAmount, (newAmount * loan.interestRate * loan.term) / (12 * 100 * loan.term));
+            } else {
+                UI.showAlert('Loan top up processed successfully', 'success');
+            }
+
+            // Reload top up select and form
+            await this.loadTopUpLoanSelect();
+            UI.clearForm('topUpLoanForm');
+            document.getElementById('topUpSelectLoan').value = '';
+            
+            UI.refreshLoans();
+            UI.refreshReports();
+            document.dispatchEvent(new CustomEvent('loansUpdated'));
+        } catch (error) {
+            if (typeof SweetAlertUI !== 'undefined') {
+                SweetAlertUI.error('Error', 'Failed to process top up: ' + error.message);
+            } else {
+                UI.showAlert('Error processing top up: ' + error.message, 'error');
+            }
+        }
     },
 
     async deleteLoan(id) {

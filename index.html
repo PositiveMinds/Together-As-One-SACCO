@@ -356,44 +356,120 @@
 
                     <div class="row">
                         <div class="col-lg-4 mb-4">
-                            <div class="card shadow-sm">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Create New Loan</h5>
+                            <ul class="nav nav-tabs mb-3" role="tablist" style="border-bottom: 2px solid #e5e7eb;">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="newLoanTab" data-bs-toggle="tab" data-bs-target="#newLoanForm" type="button" role="tab">
+                                        New Loan
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="topUpTab" data-bs-toggle="tab" data-bs-target="#topUpForm" type="button" role="tab">
+                                        Top Up Loan
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <!-- New Loan Form -->
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="newLoanForm">
+                                    <div class="card shadow-sm">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Create New Loan</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form id="loanForm">
+                                                 <div class="mb-3">
+                                                     <label for="borrowerType" class="form-label">Borrower Type</label>
+                                                     <select class="form-control" id="borrowerType" required onchange="App.updateBorrowerOptions()">
+                                                         <option value="" disabled selected>Select borrower type...</option>
+                                                         <option value="member">Member</option>
+                                                         <option value="non-member">Non-Member</option>
+                                                     </select>
+                                                 </div>
+                                                 <div class="mb-3">
+                                                     <label for="loanMember" class="form-label">Member</label>
+                                                     <select class="virtual-select" id="loanMember" placeholder="Search member..." required style="display: none;">
+                                                         <option value="" disabled selected>Select member...</option>
+                                                     </select>
+                                                     <input type="text" class="form-control" id="nonMemberName" placeholder="Non-Member Name" style="display: none;" />
+                                                 </div>
+                                                 <div class="mb-3">
+                                                     <label for="loanType" class="form-label">Loan Type</label>
+                                                     <select class="form-control" id="loanType" required onchange="App.updateInterestRate()">
+                                                         <option value="" disabled selected>Select loan type...</option>
+                                                         <option value="normal">Normal Loan (2%)</option>
+                                                         <option value="emergency">Emergency Loan (5%)</option>
+                                                         <option value="non-member">Non-Member Loan (10%)</option>
+                                                     </select>
+                                                 </div>
+                                                 <div class="mb-3">
+                                                     <label for="loanAmount" class="form-label">Amount (UGX)</label>
+                                                     <input type="number" class="form-control" id="loanAmount"
+                                                         placeholder="Loan Amount" min="1" required>
+                                                 </div>
+                                                 <div class="mb-3">
+                                                     <label for="loanTerm" class="form-label">Term (months)</label>
+                                                     <input type="number" class="form-control" id="loanTerm"
+                                                         placeholder="Loan Term" min="1" max="60" required>
+                                                 </div>
+                                                 <div class="mb-3">
+                                                     <label for="interestRate" class="form-label">Interest Rate (%)</label>
+                                                     <input type="number" class="form-control" id="interestRate"
+                                                         placeholder="Interest Rate" min="0" max="100" step="0.1" value="2" readonly>
+                                                 </div>
+                                                 <div class="mb-3">
+                                                     <label for="loanDate" class="form-label">Loan Date</label>
+                                                     <input type="date" class="form-control" id="loanDate" required>
+                                                 </div>
+                                                 <div class="mb-3 p-3 bg-light rounded">
+                                                     <label class="form-label mb-2">📊 Monthly Installment</label>
+                                                     <p class="mb-0" id="monthlyInstallment"
+                                                         style="font-size: 1.3rem; font-weight: 600; color: #2563eb;">UGX 0</p>
+                                                 </div>
+                                                 <button type="submit" class="btn btn-primary w-100">Create Loan</button>
+                                             </form>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="card-body">
-                                    <form id="loanForm">
-                                         <div class="mb-3">
-                                             <label for="loanMember" class="form-label">Member</label>
-                                             <select class="virtual-select" id="loanMember" placeholder="Search member..." required>
-                                                 <option value="" disabled selected>Select member...</option>
-                                             </select>
-                                         </div>
-                                        <div class="mb-3">
-                                            <label for="loanAmount" class="form-label">Amount (UGX)</label>
-                                            <input type="number" class="form-control" id="loanAmount"
-                                                placeholder="Loan Amount" min="1" required>
+
+                                <!-- Top Up Loan Form -->
+                                <div class="tab-pane fade" id="topUpForm">
+                                    <div class="card shadow-sm">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Top Up Existing Loan</h5>
                                         </div>
-                                        <div class="mb-3">
-                                            <label for="loanTerm" class="form-label">Term (months)</label>
-                                            <input type="number" class="form-control" id="loanTerm"
-                                                placeholder="Loan Term" min="1" max="60" required>
+                                        <div class="card-body">
+                                            <form id="topUpLoanForm">
+                                                 <div class="mb-3">
+                                                     <label for="topUpSelectLoan" class="form-label">Select Loan to Top Up</label>
+                                                     <select class="virtual-select" id="topUpSelectLoan" placeholder="Search loan..." required>
+                                                         <option value="" disabled selected>Choose a loan...</option>
+                                                     </select>
+                                                 </div>
+                                                 <div class="mb-3 p-3 bg-light rounded">
+                                                     <p class="text-muted mb-2" style="font-size: 0.9rem;">Current Loan Details</p>
+                                                     <p class="mb-1"><strong>Original Amount:</strong> <span id="topUpOriginalAmount">-</span></p>
+                                                     <p class="mb-1"><strong>Interest Rate:</strong> <span id="topUpInterestRate">-</span></p>
+                                                     <p class="mb-1"><strong>Remaining Balance:</strong> <span id="topUpRemainingBalance">-</span></p>
+                                                 </div>
+                                                 <div class="mb-3">
+                                                     <label for="topUpAmount" class="form-label">Top Up Amount (UGX)</label>
+                                                     <input type="number" class="form-control" id="topUpAmount"
+                                                         placeholder="Additional Amount" min="1" required>
+                                                 </div>
+                                                 <div class="mb-3">
+                                                     <label for="topUpDate" class="form-label">Top Up Date</label>
+                                                     <input type="date" class="form-control" id="topUpDate" required>
+                                                 </div>
+                                                 <div class="mb-3 p-3 bg-light rounded">
+                                                     <label class="form-label mb-2">📊 New Total Amount</label>
+                                                     <p class="mb-0" id="topUpNewTotal"
+                                                         style="font-size: 1.3rem; font-weight: 600; color: #2563eb;">UGX 0</p>
+                                                 </div>
+                                                 <button type="submit" class="btn btn-success w-100">Process Top Up</button>
+                                             </form>
                                         </div>
-                                        <div class="mb-3">
-                                            <label for="interestRate" class="form-label">Interest Rate (%)</label>
-                                            <input type="number" class="form-control" id="interestRate"
-                                                placeholder="Interest Rate" min="0" max="100" step="0.1" value="2">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="loanDate" class="form-label">Loan Date</label>
-                                            <input type="date" class="form-control" id="loanDate" required>
-                                        </div>
-                                        <div class="mb-3 p-3 bg-light rounded">
-                                            <label class="form-label mb-2">📊 Monthly Installment</label>
-                                            <p class="mb-0" id="monthlyInstallment"
-                                                style="font-size: 1.3rem; font-weight: 600; color: #2563eb;">UGX 0</p>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary w-100">Create Loan</button>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -417,7 +493,9 @@
                                             <thead >
                                                 <tr>
                                                     <th>Member</th>
+                                                    <th>Loan Type</th>
                                                     <th>Amount</th>
+                                                    <th>Interest</th>
                                                     <th>Monthly Payment</th>
                                                     <th>Due Date</th>
                                                     <th>Status</th>

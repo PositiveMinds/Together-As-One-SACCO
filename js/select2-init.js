@@ -8,16 +8,17 @@ const Select2Init = {
     // Initialize Select2 on all select elements
     init() {
         // Define which selects should be enhanced with Select2
-        const selectorsToEnhance = [
-            '#loanMember',
-            '#paymentLoan',
-            '#transactionMemberSelect',
-            '#savingMember',
-            '#withdrawalMember',
-            '#activityMemberFilter',
-            '#reportMember',
-            '#languageSelect'
-        ];
+         const selectorsToEnhance = [
+             '#loanMember',
+             '#paymentLoan',
+             '#topUpSelectLoan',
+             '#transactionMemberSelect',
+             '#savingMember',
+             '#withdrawalMember',
+             '#activityMemberFilter',
+             '#reportMember',
+             '#languageSelect'
+         ];
 
         selectorsToEnhance.forEach(selector => {
             const element = document.querySelector(selector);
@@ -106,6 +107,7 @@ const Select2Init = {
         const placeholders = {
             '#loanMember': 'Select member...',
             '#paymentLoan': 'Select loan...',
+            '#topUpSelectLoan': 'Choose a loan...',
             '#transactionMemberSelect': 'Choose a member...',
             '#savingMember': 'Select member...',
             '#withdrawalMember': 'Select member...',
