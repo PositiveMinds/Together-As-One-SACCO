@@ -807,9 +807,37 @@ const UI = {
                 <tr><td>Completed Loans</td><td><strong>${completedCount}</strong></td></tr>
             </table>
         `;
-    },
+        },
 
-    async refreshRankingReport() {
+        async refreshLoanReportForMember(memberId) {
+        const loans = await Storage.getLoans();
+        const memberLoans = loans.filter(l => l.memberId === memberId);
+        const container = document.getElementById('loanReport');
+
+        if (memberLoans.length === 0) {
+            container.innerHTML = '<p class="text-muted text-center">No loans for this member</p>';
+            return;
+        }
+
+        const totalLoaned = memberLoans.reduce((sum, l) => sum + l.amount, 0);
+        const totalRepaid = memberLoans.reduce((sum, l) => sum + l.paid, 0);
+        const outstanding = totalLoaned - totalRepaid;
+        const activeCount = memberLoans.filter(l => l.status === 'active').length;
+        const completedCount = memberLoans.filter(l => l.status === 'completed').length;
+
+        container.innerHTML = `
+            <table class="report-output">
+                <tr><td>Total Loans Disbursed</td><td><strong>UGX ${this.formatNumber(totalLoaned)}</strong></td></tr>
+                <tr><td>Total Amount Repaid</td><td><strong>UGX ${this.formatNumber(totalRepaid)}</strong></td></tr>
+                <tr><td>Outstanding Balance</td><td><strong>UGX ${this.formatNumber(outstanding)}</strong></td></tr>
+                <tr><td>Repayment Rate</td><td><strong>${totalLoaned > 0 ? ((totalRepaid / totalLoaned) * 100).toFixed(1) : 0}%</strong></td></tr>
+                <tr><td>Active Loans</td><td><strong>${activeCount}</strong></td></tr>
+                <tr><td>Completed Loans</td><td><strong>${completedCount}</strong></td></tr>
+            </table>
+        `;
+        },
+
+        async refreshRankingReport() {
          const loans = await Storage.getLoans();
          const container = document.getElementById('rankingReport');
 

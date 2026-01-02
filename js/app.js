@@ -345,8 +345,10 @@ const App = {
         document.getElementById('reportMember').addEventListener('change', async (e) => {
             if (e.target.value) {
                 await this.showMemberReport(e.target.value);
+                await UI.refreshLoanReportForMember(e.target.value);
             } else {
                 document.getElementById('memberReport').innerHTML = '<p class="text-muted text-center py-4">Select a member to view details</p>';
+                document.getElementById('loanReport').innerHTML = '<p class="text-muted text-center py-4">Select a member to view loans</p>';
             }
         });
 
