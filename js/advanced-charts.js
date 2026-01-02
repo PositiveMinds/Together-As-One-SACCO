@@ -106,45 +106,45 @@ class AdvancedCharts {
      * Get responsive grid options based on screen width
      */
     getResponsiveGridOptions() {
-         const width = window.innerWidth;
-         const isMobile = width < 480;
-         const isSmallMobile = width < 640;
-         const isTablet = width < 1024;
+        const width = window.innerWidth;
+        const isMobile = width < 480;
+        const isSmallMobile = width < 640;
+        const isTablet = width < 1024;
 
-         if (isMobile) {
-             return {
-                 top: 30,
-                 left: 30,
-                 right: 5,
-                 bottom: 25,
-                 containLabel: true
-             };
-         } else if (isSmallMobile) {
-             return {
-                 top: 35,
-                 left: 35,
-                 right: 8,
-                 bottom: 30,
-                 containLabel: true
-             };
-         } else if (isTablet) {
-             return {
-                 top: 45,
-                 left: 45,
-                 right: 15,
-                 bottom: 35,
-                 containLabel: true
-             };
-         } else {
-             return {
-                 top: 70,
-                 left: 55,
-                 right: 25,
-                 bottom: 45,
-                 containLabel: true
-             };
-         }
-     }
+        if (isMobile) {
+            return {
+                top: 30,
+                left: 10,
+                right: 5,
+                bottom: 25,
+                containLabel: true
+            };
+        } else if (isSmallMobile) {
+            return {
+                top: 35,
+                left: 15,
+                right: 8,
+                bottom: 30,
+                containLabel: true
+            };
+        } else if (isTablet) {
+            return {
+                top: 45,
+                left: 20,
+                right: 15,
+                bottom: 35,
+                containLabel: true
+            };
+        } else {
+            return {
+                top: 70,
+                left: 30,
+                right: 25,
+                bottom: 45,
+                containLabel: true
+            };
+        }
+    }
 
     /**
      * Get responsive axis label options based on screen width
