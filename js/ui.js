@@ -625,10 +625,14 @@ const UI = {
     loansPageSize: 5,
 
     async refreshLoans() {
-        await this.refreshMemberSelect();
-        await this.refreshLoansList();
-        await this.refreshLoanSelect();
-    },
+         await this.refreshMemberSelect();
+         await this.refreshLoansList();
+         await this.refreshLoanSelect();
+         // Load top-up loan select when loans page is shown
+         if (typeof App !== 'undefined' && App.loadTopUpLoanSelect) {
+             await App.loadTopUpLoanSelect();
+         }
+     },
 
     async refreshLoansList() {
          const loans = await Storage.getLoans();

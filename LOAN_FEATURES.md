@@ -63,6 +63,7 @@ The SACCO system now includes advanced loan management features with support for
 
 ### Form Fields
 1. Select Loan to Top Up (dropdown)
+   - Shows: Loan ID, Borrower/Member Name, Remaining Balance
 2. Current Loan Details (display only)
    - Original Amount
    - Interest Rate

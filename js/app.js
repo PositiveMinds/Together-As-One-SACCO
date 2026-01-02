@@ -10,14 +10,14 @@ const App = {
       },
 
       async init() {
-            await this.setupEventListeners();
-            // Restore the last active page, or show dashboard as default
-            await UI.restoreLastPage();
-            // Restore scroll position
-            this.restoreScrollPosition();
-            // Setup scroll position saving
-            this.setupScrollPositionSaving();
-        },
+             await this.setupEventListeners();
+             // Restore the last active page, or show dashboard as default
+             await UI.restoreLastPage();
+             // Restore scroll position
+             this.restoreScrollPosition();
+             // Setup scroll position saving
+             this.setupScrollPositionSaving();
+         },
 
       setupScrollPositionSaving() {
             window.addEventListener('scroll', () => {
@@ -320,11 +320,16 @@ const App = {
             this.processLoanTopUp();
         });
 
-        document.getElementById('topUpSelectLoan')?.addEventListener('change', async (e) => {
-            if (e.target.value) {
-                await this.loadLoanTopUpDetails(e.target.value);
-            }
-        });
+        const topUpSelect = document.getElementById('topUpSelectLoan');
+        if (topUpSelect) {
+            // Standard change event listener
+            topUpSelect.addEventListener('change', async (e) => {
+                const value = e.target.value;
+                if (value && value.length > 0) {
+                    await this.loadLoanTopUpDetails(value);
+                }
+            });
+        }
 
         document.getElementById('topUpAmount')?.addEventListener('input', () => this.calculateNewTopUpTotal());
 
@@ -946,43 +951,86 @@ const App = {
     async loadTopUpLoanSelect() {
         try {
             const loans = await Storage.getLoans();
+            const members = await Storage.getMembers();
             const activeLoans = loans.filter(l => l.status === 'active');
             const select = document.getElementById('topUpSelectLoan');
             
             if (select && activeLoans.length > 0) {
+                // Clear existing options
                 select.innerHTML = '<option value="" disabled selected>Choose a loan...</option>';
+                
                 activeLoans.forEach(loan => {
                     const remaining = loan.amount - loan.paid;
-                    const borrowerName = loan.borrowerType === 'non-member' ? loan.borrowerName : 'Member Loan';
+                    // Get borrower name: for non-members it's stored, for members we fetch it
+                    let borrowerName = loan.borrowerName;
+                    if (loan.borrowerType === 'member' && loan.memberId) {
+                        const member = members.find(m => m.id === loan.memberId);
+                        borrowerName = member ? member.name : 'Unknown Member';
+                    }
                     const option = document.createElement('option');
                     option.value = loan.id;
-                    option.textContent = `${loan.id.substring(0, 8)} - ${borrowerName} (Balance: UGX ${UI.formatNumber(remaining)})`;
+                    option.textContent = `${borrowerName} (${loan.id.substring(0, 8)}) - Balance: UGX ${UI.formatNumber(remaining)}`;
                     select.appendChild(option);
                 });
                 
-                // Refresh Select2 if available
-                if (typeof jQuery !== 'undefined' && jQuery(select).data('select2')) {
-                    jQuery(select).trigger('change');
-                }
+                // Re-attach change listener after populating options
+                this.setupTopUpSelectListener();
             }
         } catch (error) {
             console.error('Error loading top up loans:', error);
+        }
+    },
+    
+    setupTopUpSelectListener() {
+        const topUpSelect = document.getElementById('topUpSelectLoan');
+        if (topUpSelect) {
+            // Remove old listeners by cloning
+            const newSelect = topUpSelect.cloneNode(true);
+            topUpSelect.parentNode.replaceChild(newSelect, topUpSelect);
+            
+            // Add new listener
+            newSelect.addEventListener('change', async (e) => {
+                const value = e.target.value;
+                if (value && value.length > 0) {
+                    await this.loadLoanTopUpDetails(value);
+                }
+            });
         }
     },
 
     async loadLoanTopUpDetails(loanId) {
         try {
             const loan = await Storage.getLoanById(loanId);
+            
             if (!loan) {
                 UI.showAlert('Loan not found', 'error');
                 return;
             }
 
             const remaining = loan.amount - loan.paid;
-            document.getElementById('topUpOriginalAmount').textContent = `UGX ${UI.formatNumber(loan.amount)}`;
-            document.getElementById('topUpInterestRate').textContent = `${loan.interestRate}%`;
-            document.getElementById('topUpRemainingBalance').textContent = `UGX ${UI.formatNumber(remaining)}`;
+            
+            // Update both page and modal versions of the details
+            const currentLoanAmountEl = document.getElementById('currentLoanAmount');
+            const topUpOriginalAmountEl = document.getElementById('topUpOriginalAmount');
+            
+            if (currentLoanAmountEl) currentLoanAmountEl.textContent = `UGX ${UI.formatNumber(loan.amount)}`;
+            if (topUpOriginalAmountEl) topUpOriginalAmountEl.textContent = `UGX ${UI.formatNumber(loan.amount)}`;
+            
+            const currentLoanRateEl = document.getElementById('currentLoanRate');
+            const topUpInterestRateEl = document.getElementById('topUpInterestRate');
+            if (currentLoanRateEl) currentLoanRateEl.textContent = `${loan.interestRate}%`;
+            if (topUpInterestRateEl) topUpInterestRateEl.textContent = `${loan.interestRate}%`;
+            
+            const currentLoanBalanceEl = document.getElementById('currentLoanBalance');
+            const topUpRemainingBalanceEl = document.getElementById('topUpRemainingBalance');
+            if (currentLoanBalanceEl) currentLoanBalanceEl.textContent = `UGX ${UI.formatNumber(remaining)}`;
+            if (topUpRemainingBalanceEl) topUpRemainingBalanceEl.textContent = `UGX ${UI.formatNumber(remaining)}`;
+            
+            const currentLoanDueDateEl = document.getElementById('currentLoanDueDate');
+            if (currentLoanDueDateEl) currentLoanDueDateEl.textContent = new Date(loan.dueDate).toLocaleDateString();
+            
             document.getElementById('topUpAmount').value = '';
+            document.getElementById('topUpDate').valueAsDate = new Date();
             this.calculateNewTopUpTotal();
         } catch (error) {
             console.error('Error loading loan details:', error);
