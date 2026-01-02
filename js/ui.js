@@ -389,6 +389,8 @@ const UI = {
         container.style.display = 'flex';
         container.style.flexWrap = 'wrap';
        container.style.gap = '1rem';
+        container.style.marginLeft = '2rem';
+        container.style.marginRight = '2rem';
         container.innerHTML = members.map(member => `
             <div style="flex: 0 0 300px;">
                   <div class="card member-card h-100 p-0">
@@ -472,10 +474,12 @@ const UI = {
      },
 
     renderMembersAsTable(members, container) {
-         container.className = 'col-12';
-         let html = `
-             <div class="table-responsive">
-                 <table class="table table-hover mb-0 members-table">
+        container.className = 'col-12';
+        container.style.marginLeft = '0';
+        container.style.marginRight = '0';
+        let html = `
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 members-table" style="width: 100%;">
                      <thead class="table-light">
                          <tr>
                              <th style="width: 60px; text-align: center;">Photo</th>
