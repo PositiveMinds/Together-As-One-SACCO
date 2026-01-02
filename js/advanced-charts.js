@@ -444,7 +444,7 @@ class AdvancedCharts {
              },
              grid: {
                  top: isMobile ? 30 : isSmallMobile ? 35 : 40,
-                 left: isMobile ? 35 : isSmallMobile ? 40 : isTablet ? 70 : 100,
+                 left: isMobile ? 10 : isSmallMobile ? 15 : isTablet ? 25 : 40,
                  right: isMobile ? 8 : isSmallMobile ? 10 : 30,
                  bottom: isMobile ? 50 : isSmallMobile ? 60 : 80,
                  containLabel: true
