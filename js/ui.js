@@ -203,6 +203,37 @@ const UI = {
         }, 800);
     },
 
+    loadMoreFilteredActivities() {
+        const btn = document.getElementById('loadMoreActivities');
+        if (btn) {
+            btn.classList.add('loading');
+            btn.innerHTML = '<i class="ri-time-line"></i><span>Loading...</span>';
+        }
+        
+        // Simulate network delay for better UX
+        setTimeout(() => {
+            this.currentActivityPage += 1;
+            const tbody = document.getElementById('recentActivity');
+            const end = this.currentActivityPage * this.activityPageSize;
+            const displayActivities = this.displayActivities.slice(0, end);
+
+            if (displayActivities.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No activities found</td></tr>';
+            } else {
+                tbody.innerHTML = displayActivities.map(activity => `
+                    <tr>
+                        <td>${activity.member}</td>
+                        <td>${activity.type === 'loan' ? 'Loan Disbursed' : activity.type === 'payment' ? 'Payment Received' : 'Saving Recorded'}</td>
+                        <td>UGX ${this.formatNumber(activity.amount)}</td>
+                        <td>${activity.date.toLocaleDateString()}</td>
+                    </tr>
+                `).join('');
+            }
+            
+            this.renderActivityPaginationFiltered(this.displayActivities);
+        }, 800);
+    },
+
     renderActivityPagination() {
         const container = document.getElementById('activitiesPagination');
         const itemsShown = this.currentActivityPage * this.activityPageSize;
@@ -224,20 +255,46 @@ const UI = {
         container.innerHTML = html;
     },
 
+    renderActivityPaginationFiltered(filteredActivities) {
+        const container = document.getElementById('activitiesPagination');
+        const itemsShown = this.currentActivityPage * this.activityPageSize;
+        const totalItems = filteredActivities.length;
+
+        if (itemsShown >= totalItems) {
+            container.innerHTML = '';
+            return;
+        }
+
+        const html = `<div class="load-more-container">
+            <button class="btn-load-more btn-sm" onclick="UI.loadMoreFilteredActivities()" id="loadMoreActivities">
+                <i class="ri-arrow-down-circle-line"></i>
+                <span>More</span>
+                <span class="load-more-progress">${itemsShown}/${totalItems}</span>
+            </button>
+        </div>`;
+
+        container.innerHTML = html;
+    },
+
     filterRecentActivity(memberName) {
         this.currentActivityPage = 1;
         const tbody = document.getElementById('recentActivity');
 
+        // Filter activities based on member selection
         let filteredActivities = this.allActivities;
         if (memberName) {
             filteredActivities = this.allActivities.filter(a => a.member === memberName);
         }
 
+        // Store filtered activities temporarily for rendering
+        this.displayActivities = filteredActivities;
+        
         const end = this.currentActivityPage * this.activityPageSize;
         const displayActivities = filteredActivities.slice(0, end);
 
         if (displayActivities.length === 0) {
             tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No activities found</td></tr>';
+            document.getElementById('activitiesPagination').innerHTML = '';
         } else {
             tbody.innerHTML = displayActivities.map(activity => `
                 <tr>
@@ -247,26 +304,11 @@ const UI = {
                     <td>${activity.date.toLocaleDateString()}</td>
                 </tr>
             `).join('');
+            
+            // Update pagination with filtered data
+            this.renderActivityPaginationFiltered(filteredActivities);
         }
-
-        // Store filtered activities and update pagination
-        const container = document.getElementById('activitiesPagination');
-        const itemsShown = this.currentActivityPage * this.activityPageSize;
-        const totalItems = filteredActivities.length;
-
-        if (itemsShown >= totalItems) {
-            container.innerHTML = '';
-        } else {
-             const html = `<div class="load-more-container">
-                 <button class="btn-load-more btn-sm" onclick="UI.loadMoreActivities()" id="loadMoreActivities">
-                     <i class="ri-arrow-down-circle-line"></i>
-                     <span>More</span>
-                     <span class="load-more-progress">${itemsShown}/${totalItems}</span>
-                 </button>
-             </div>`;
-            container.innerHTML = html;
-        }
-    },
+        },
 
     // Members refresh
     async refreshMembers() {
@@ -391,11 +433,23 @@ const UI = {
        container.style.gap = '1rem';
         container.style.marginLeft = '2rem';
         container.style.marginRight = '2rem';
-        container.innerHTML = members.map(member => `
+        
+        const gradients = [
+            'linear-gradient(135deg, #0066FF 0%, #0066FF 100%)',
+            'linear-gradient(135deg, #31C950 0%, #31C950 100%)',
+            'linear-gradient(135deg, #FA8FBB 0%, #F54927 100%)',
+            'linear-gradient(135deg, #FAA18F 0%, #FAA18F 100%)',
+            'linear-gradient(135deg, #FF0033 0%, #9C0745 100%)',
+            'linear-gradient(135deg, #F54927 0%, #FF0033 100%)',
+        ];
+        
+        container.innerHTML = members.map((member, index) => {
+            const gradient = gradients[index % gradients.length];
+            return `
             <div style="flex: 0 0 300px;">
                   <div class="card member-card h-100 p-0">
                      <!-- Card Header with Avatar and Actions -->
-                     <div class="member-card-header-section" style="position: relative; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: -1px -1px 0 -1px; border-radius: 12px 12px 0 0; width: calc(100% + 2px);">
+                     <div class="member-card-header-section" style="position: relative; background: ${gradient}; margin: -1px -1px 0 -1px; border-radius: 12px 12px 0 0; width: calc(100% + 2px);">
                          <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 1.5rem 1.5rem;">
                              <div class="member-avatar">
                                  ${App.getAvatarHtml(member, 'lg')}
@@ -466,12 +520,13 @@ const UI = {
                                      <p class="info-value mb-0">${new Date(member.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                                  </div>
                              </div>
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         `).join('');
-     },
+                             </div>
+                             </div>
+                             </div>
+                             </div>
+                             `;
+                             }).join('');
+                             },
 
     renderMembersAsTable(members, container) {
         container.className = 'col-12';

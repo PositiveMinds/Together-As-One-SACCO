@@ -29,15 +29,15 @@ class AdvancedCharts {
         };
         
         this.colorPalette = {
-            primary: '#3B82F6',
-            secondary: '#8B5CF6',
-            success: '#10B981',
-            warning: '#F59E0B',
-            danger: '#EF4444',
-            gradient1: ['#3B82F6', '#8B5CF6', '#EC4899'],
-            gradient2: ['#06B6D4', '#10B981', '#FBBF24'],
-            vibrant: ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#06B6D4', '#EF4444'],
-            light: '#F3F4F6'
+            primary: '#0066FF',
+            secondary: '#FA8FBB',
+            success: '#31C950',
+            warning: '#FAA18F',
+            danger: '#FF0033',
+            gradient1: ['#0066FF', '#FA8FBB', '#FF0033'],
+            gradient2: ['#F54927', '#31C950', '#FAA18F'],
+            vibrant: ['#0066FF', '#31C950', '#FA8FBB', '#F54927', '#FAA18F', '#9C0745', '#FF0033'],
+            light: '#FEEBE7'
         };
         
         // Real-time update interval

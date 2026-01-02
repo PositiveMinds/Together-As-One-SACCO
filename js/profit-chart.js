@@ -20,20 +20,20 @@ function initializeProfitChart(labels = [], data = []) {
     console.log('Initializing chart with labels:', labels, 'data:', data);
     console.log('Screen width:', window.innerWidth, 'isMobile:', isMobile);
 
-    // Vibrant color palette with high saturation (no red)
+    // Custom color palette
     const colors = [
-        '#00E676',  // Bright Green
-        '#00B0FF',  // Bright Blue
-        '#FFEA00',  // Bright Yellow
-        '#FF6E40',  // Vibrant Orange
-        '#9C27B0',  // Vibrant Purple
-        '#00BCD4',  // Bright Cyan
-        '#4CAF50',  // Vibrant Lime
-        '#FF9800',  // Deep Orange
-        '#673AB7',  // Deep Purple
-        '#00ACC1',  // Dark Cyan
-        '#76FF03',  // Bright Lime
-        '#00E5FF'   // Cyan Accent
+        '#0066FF',  // Primary Blue
+        '#31C950',  // Success Green
+        '#FA8FBB',  // Secondary Pink
+        '#F54927',  // Danger Red
+        '#FAA18F',  // Warning Orange
+        '#9C0745',  // Dark Magenta
+        '#FF0033',  // Bright Red
+        '#FEEBE7',  // Light Pink
+        '#0066FF',  // Primary Blue (repeat)
+        '#31C950',  // Success Green (repeat)
+        '#FA8FBB',  // Secondary Pink (repeat)
+        '#F54927'   // Danger Red (repeat)
     ];
 
     if (profitChart) {
