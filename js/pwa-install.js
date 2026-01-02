@@ -12,15 +12,18 @@ class PWAInstaller {
     }
 
     init() {
-        console.log('%c📱 PWA Installer initializing...', 'color: #FFCC00; font-weight: bold');
-        
-        // Log device info
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const isHTTPS = location.protocol === 'https:' || location.hostname === 'localhost';
-        console.log('Device Info:', { isMobile, isHTTPS, userAgent: navigator.userAgent });
+         console.log('%c📱 PWA Installer initializing...', 'color: #FFCC00; font-weight: bold');
+         
+         // Log device info
+         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+         const isHTTPS = location.protocol === 'https:' || location.hostname === 'localhost';
+         console.log('Device Info:', { isMobile, isHTTPS, userAgent: navigator.userAgent });
 
-        // Check if app is already installed
-        this.checkIfInstalled();
+         // Check if app is already installed
+         this.checkIfInstalled();
+         
+         // Always hide button initially, show only if PWA prompt is available
+         this.hideInstallButton();
 
         if (!this.isInstalled) {
             // Wait for service worker to be ready before listening for install prompt
@@ -81,14 +84,14 @@ class PWAInstaller {
              // Hide install button immediately
              const installBtn = document.getElementById('pwaInstallBtn');
              if (installBtn) {
-                 installBtn.style.display = 'none';
+                 installBtn.style.setProperty('display', 'none', 'important');
                  console.log('Install button hidden');
              }
              
              // Hide install banner
              const banner = document.getElementById('installBanner');
              if (banner) {
-                 banner.style.display = 'none';
+                 banner.style.setProperty('display', 'none', 'important');
                  console.log('Install banner hidden');
              }
 
@@ -177,13 +180,13 @@ class PWAInstaller {
                          // Hide install button and banner immediately
                          const installBtn = document.getElementById('pwaInstallBtn');
                          if (installBtn) {
-                             installBtn.style.display = 'none';
+                             installBtn.style.setProperty('display', 'none', 'important');
                              console.log('Install button hidden after acceptance');
                          }
                          
                          const banner = document.getElementById('installBanner');
                          if (banner) {
-                             banner.style.display = 'none';
+                             banner.style.setProperty('display', 'none', 'important');
                              console.log('Install banner hidden after acceptance');
                          }
                      } else {
@@ -212,7 +215,7 @@ class PWAInstaller {
     displayButton() {
         this.installBtn = document.getElementById('pwaInstallBtn');
         if (this.installBtn) {
-            this.installBtn.style.display = 'inline-block';
+            this.installBtn.style.setProperty('display', 'inline-block', 'important');
             console.log('✅ Install button displayed');
         }
     }
@@ -255,7 +258,7 @@ class PWAInstaller {
     removeButton() {
         this.installBtn = document.getElementById('pwaInstallBtn');
         if (this.installBtn) {
-            this.installBtn.style.display = 'none';
+            this.installBtn.style.setProperty('display', 'none', 'important');
         }
     }
 
@@ -283,13 +286,13 @@ class PWAInstaller {
                  // Hide install button and banner immediately
                  const installBtn = document.getElementById('pwaInstallBtn');
                  if (installBtn) {
-                     installBtn.style.display = 'none';
+                     installBtn.style.setProperty('display', 'none', 'important');
                      console.log('Install button hidden');
                  }
                  
                  const banner = document.getElementById('installBanner');
                  if (banner) {
-                     banner.style.display = 'none';
+                     banner.style.setProperty('display', 'none', 'important');
                      console.log('Install banner hidden');
                  }
 
